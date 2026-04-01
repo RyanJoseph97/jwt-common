@@ -1,32 +1,32 @@
 name: Publish to GitHub Packages
 
 on:
+  push:
+    branches: [ master ]
   release:
-    types: [created]
-  workflow_dispatch:  # allows manual trigger from the GitHub UI
+    types: [ created ]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: write   # required to publish to GitHub Packages
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 11
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
-          # Automatically writes ~/.m2/settings.xml with a <server id="github">
-          # entry wired to GITHUB_TOKEN — no manual settings.xml needed.
-          server-id: github
+          cache: 'maven'
+          server-id: github               # matches the <id> in distributionManagement
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      - name: Publish package
-        run: mvn --batch-mode deploy -DskipTests
+      - name: Publish artifact
+        run: mvn --batch-mode --no-transfer-progress deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
