@@ -64,7 +64,16 @@ public class JwtConfig {
     }
 
     public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
+        return generateToken(username, new HashMap<>());
+    }
+
+    /**
+     * Generates a token with additional claims embedded in the payload.
+     * Use this to include domain-specific data (e.g. accountStatus) so
+     * downstream services can authorise without calling back to user-service.
+     */
+    public String generateToken(String username, Map<String, Object> additionalClaims) {
+        Map<String, Object> claims = new HashMap<>(additionalClaims);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
